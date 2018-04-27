@@ -1,0 +1,463 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage{todonotes}
+\newcounter{numerotodo}
+\newcommand{\TODO}[1]{\refstepcounter{numerotodo}\todo[inline]{\thenumerotodo) #1}}
+\usepackage{geometry}
+ \geometry{
+      a4paper,
+       total={170mm,257mm},
+        left=20mm,
+         top=20mm,
+          }
+
+\usepackage{xcolor}
+\definecolor{cStr}{RGB}{219, 48, 122}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings,skins}
+\lstdefinestyle{mystyle}{
+     basicstyle=\ttfamily\color{white},
+     language=bash,
+     tabsize=1,
+     keywordstyle=\color{blue},
+     showstringspaces=false,
+     morekeywords={...}
+ }
+\newtcblisting{mylisting}{
+      enhanced,                             %%% needed for shadow
+      arc=2mm,
+      top=0mm,
+      bottom=0mm,
+      left=0mm,
+      right=0mm,
+      boxrule=0pt,
+      colback=black,
+      %shadow={5mm}{-3mm}{0mm}{fill=black!50!white,opacity=0.5},             %%% here for shadow  and adjust as you like
+      listing only,
+      listing options={style=mystyle},
+      hbox
+}
+\newtcblisting{cCode}{
+	  enhanced,                             %%% needed for shadow
+      arc=0mm,
+      top=0mm,
+      bottom=2mm,
+      left=0mm,
+      right=0mm,
+      boxrule=-1pt,
+      listing only,
+      listing options={style=cstyle},
+      colback=white,
+}    
+  
+\lstdefinestyle{cstyle}{
+  aboveskip=3mm,
+  belowskip=-2mm,
+  backgroundcolor=\color{white},
+  basicstyle=\normalsize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{gray},
+  deletekeywords={...},
+  escapeinside={\%*}{*)},
+  extendedchars=true,
+  framexleftmargin=16pt,
+  framextopmargin=3pt,
+  framexbottommargin=3pt,
+  frame=bt,
+  keepspaces=true,
+  keywordstyle=\color{blue},
+  language=C,
+  literate=
+  {²}{{\textsuperscript{2}}}1
+  {⁴}{{\textsuperscript{4}}}1
+  {⁶}{{\textsuperscript{6}}}1
+  {⁸}{{\textsuperscript{8}}}1
+  {€}{{\euro{}}}1
+  {é}{{\'e}}1
+  {è}{{\`{e}}}1
+  {ê}{{\^{e}}}1
+  {ë}{{\¨{e}}}1
+  {É}{{\'{E}}}1
+  {Ê}{{\^{E}}}1
+  {û}{{\^{u}}}1
+  {ù}{{\`{u}}}1
+  {â}{{\^{a}}}1
+  {à}{{\`{a}}}1
+  {á}{{\'{a}}}1
+  {ã}{{\~{a}}}1
+  {Á}{{\'{A}}}1
+  {Â}{{\^{A}}}1
+  {Ã}{{\~{A}}}1
+  {ç}{{\c{c}}}1
+  {Ç}{{\c{C}}}1
+  {õ}{{\~{o}}}1
+  {ó}{{\'{o}}}1
+  {ô}{{\^{o}}}1
+  {Õ}{{\~{O}}}1
+  {Ó}{{\'{O}}}1
+  {Ô}{{\^{O}}}1
+  {î}{{\^{i}}}1
+  {Î}{{\^{I}}}1
+  {í}{{\'{i}}}1
+  {Í}{{\~{Í}}}1,
+  morekeywords={*,...},
+  numbers=left,
+  numbersep=10pt,
+  numberstyle=\tiny\color{black},
+  rulecolor=\color{black},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  stepnumber=1,
+  stringstyle=\color{cStr},
+  tabsize=4,
+  title=\lstname,
+}
+
+\begin{document}
+\begin{center}
+\huge{TP 07 (Les bases du langage C)}
+\end{center}
+=============================================================
+
+Si vous devez travailler sur le système Linux, vous constaterez que le langage C est incontournable. Le noyau, les différents interpréteurs de commande (csh, bash...), les commandes du système d’exploitation (ls, cp, rm ...) sont écrits avec ce langage.\\
+Le C a été conçu en 1972 par Dennis Richie et Ken Thompson, chercheurs aux Bell Labs. En 1978, Brian Kernighan et Dennis Richie publient la définition classique du C dans le livre The C Programming language. Le C devenant de plus en plus populaire dans les années 80, plusieurs groupes mirent sur le marché des compilateurs comportant des extensions particulières. En 1983, l'ANSI (American National Standards Institute) décida de normaliser le langage ; ce travail s'acheva en 1989 par la définition de la norme ANSI C.
+
+\section {Compilation}
+
+Le C est un langage compilé (par opposition aux langages interprétés). Cela signifie qu'un programme C est décrit par un fichier texte, appelé fichier source. Ce fichier n'étant évidemment pas exécutable par le microprocesseur, il faut le traduire en langage machine. Cette opération est effectuée par un programme appelé compilateur. La compilation se décompose en fait en 4 phases successives : 
+\begin{enumerate}
+
+\item Le traitement par le préprocesseur.
+% le fichier source est analysé par le préprocesseur qui effectue des transformations purement textuelles (remplacement de chaînes de caractères, inclusion d'autres fichiers source ...).
+\item La compilation.
+% la compilation proprement dite traduit le fichier généré par le préprocesseur en assembleur, c'est-à-dire en une suite d'instructions du microprocesseur qui utilisent des mnémoniques rendant la lecture possible.
+\item L'assemblage.
+%cette opération transforme le code assembleur en un fichier binaire, c'est-à-dire en instructions directement compréhensibles par le processeur. Généralement, la compilation et l'assemblage se font dans la foulée, sauf si l'on spécifie explicitement que l'on veut le code assembleur. Le fichier produit par l'assemblage est appelé fichier objet.
+\item L'édition de liens.
+%un programme est souvent séparé en plusieurs fichiers source, pour des raisons de clarté mais aussi parce qu'il fait généralement appel à des librairies de fonctions standard déjà écrites. Une fois chaque code source assemblé, il faut donc lier entre eux les différents fichiers objets. L'édition de liens produit alors un fichier dit exécutable.
+\end{enumerate}
+
+L’écriture d’un programme C donne lieu à la création d’un ou plusieurs fichiers sources
+(extension .c) contenant les  éléments du langage. La création de fichiers header personnels (extension .h) permet de définir les fonctions créées par l’utilisateur. Une fois ces fichiers prêts, l’appel aux compilateur peut se faire avec la ligne de commande minimale sera :
+
+\begin{mylisting}
+>>> gcc code.c
+\end{mylisting}
+
+Cette ligne de commande crée un fichier exécutable
+a.out. Pour nommer précisément le binaire, l’option -o du compilateur suivi du nom est utilisée :
+
+\begin{mylisting}
+>>> gcc -o binaire code.c
+\end{mylisting}
+
+\TODO{Créez le fichier hello.c qui contient les instructions suivantes :}
+
+\begin{cCode}
+# include <stdio.h>
+int main(void) // fonction principale
+{
+	printf("hello world !\n"); /* commentaire */
+	return 0; // encore un commentaire
+}
+\end{cCode}
+
+
+
+\TODO{Compilez-le pour créer l’exécutable "premier" et testez-le.}
+\section{Premiers pas : variables et opérateurs} 
+\subsection{Déclaration d'une variable} 
+La déclaration d’une variable se fait en utilisant la syntaxe suivante :
+\begin{center}
+\texttt{<type> <nom>;}
+\end{center}
+\begin{itemize}
+\item[\texttt{char}] permet de définir une variable de type caractère (ASCII),
+\item[\texttt{int}] permet de définir une variable de type entier (entre -32 767 et 32 767),
+\item[\texttt{long}] permet de définir une variable de type entier (entre -2 147 483 647 et 2 147 483 647),
+\item[\texttt{float}]permet de déclarer une variable de type réel (entre $-3.4\times 10^{-38}$ et $3.4 \times 10^{38}$),
+\item[\texttt{double}] permet de déclarer une variable de type réel (entre $-1.7\times 10^{-308}$ et $1.7 \times 10^{308}$),
+\item[\texttt{bool}] permet de déclarer une variable de type booléen ($0$ et $1$).
+\end{itemize}
+\TODO{Testez le code suivant :}
+\begin{cCode}
+#include <stdio.h>
+int main (void) {
+char caractere = 't';
+int entier = 55;
+float reel = 0.01;
+double pi = 3.1215592;
+printf ("caractere vaut : \%c \n",caractere);
+printf ("entier vaut : \%d \n",entier);
+printf ("reel vaut : \%f \n",reel);
+printf ("pi vaut environ: \%f \n",pi);
+return 0;
+}
+\end{cCode}
+
+\subsection{Opérateurs} 
+
+Les opérateurs de calcul permettent d'effectuer les opérations arithmétiques ou logiques de base. 
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{c|c|c||}
+
+Opérateur & Opération & Exemple \\
++ & addition & \texttt{x+y}\\
+- & soustraction & \texttt{x-y}\\
+ {\large *}  & produit & \texttt{x*y}\\
+/ & division & \texttt{x/y}\\
+\% & modulo & \texttt{x\%y}\\
+(op)=& affectation + opération & \texttt{x+=y $\equiv$ x=x+y}\\
+++ &incrémentation & \texttt{x++ ou ++x}\\
+$--$ &décrémentation & \texttt{x$--$}\\
+
+\end{tabular}
+\centering
+\begin{tabular}{c|c|c}
+
+Opérateur & Opération & Exemple \\
+< & inférieur & \texttt{x+y}\\
+> & supérieur & \texttt{x-y}\\
+<= & inférieur ou égale & \texttt{x*y}\\
+>= & supérieur ou égale & \texttt{x/y}\\
+== & égalité & \texttt{x==y}\\
+\&\& & et & \texttt{x\&\&y}\\
+|| & ou & \texttt{x||y}\\
+! & Non ou négation & \texttt{!x}\\
+
+\end{tabular}
+\end{figure}
+
+\subsection{Bibliothèque mathématique}
+
+ La bibliothèque standard math du Langage C offre un certain nombre de fonctions mathématiques. Pour pouvoir les utiliser, il est nécessaire d'inclure au début du fichier source la directive :
+\begin{cCode}
+#include <math.h> 
+\end{cCode}
+Afin de pouvoir utiliser la bibliothèque mathématique, il est nécessaire d’ajouter à la commande de compilation l'option \texttt{-lm}, ce qui nous donne :
+
+\begin{mylisting}
+>>> gcc -o binaire code.c -lm
+\end{mylisting}
+
+
+\subsection{Saisie des variables} 
+\TODO{Pour saisir une variable, il est possible d’utiliser la fonction \texttt{scanf}. reprenez le code ci-dessous, et tester tous les opérateurs arithmétiques et logiques.}
+\begin{cCode}
+#include <stdio.h>
+int main () {
+int a,b;
+printf("Valeur de a : \n");
+scanf("%d",&a);
+printf("\n");
+printf("Valeur de b : \n");
+scanf("%d",&b);
+printf("\nValeur de a+b : %d\n",a+b); // opérateur d'addition
+return 0;
+}
+\end{cCode}
+
+
+\subsection*{Exercice 1}
+Écrivez un programme qui met en application le théorème de Pythagore pour calculer la longueur de l’hypoténuse d’un triangle rectangle.
+
+\section{Instructions de contrôle}
+
+\subsection{Conditions \texttt{if}}
+
+\begin{cCode}
+int a = 0;
+int b = 1;
+if (a = = b){
+   printf("a et b sont egaux \n");
+}else{
+   printf("a et b sont differents \n");
+}
+\end{cCode}
+
+\TODO{Écrivez un programme qui prend  une variable entière, et  indique  à
+l’utilisateur si celle-ci est strictement positive, strictement négative ou nulle.
+}
+\TODO{Écrivez un programme qui prend  une variable réelle, et indique  à
+l’utilisateur si celle-ci est un entier, sinon, il renvoie  à
+l’utilisateur sa partie décimale.
+}
+
+\subsection{Boucles \texttt{while}, \texttt{do \dots while} et \texttt{for}}
+
+
+\TODO{\texttt{while}  et \texttt{do \dots while} permettent de réaliser une suite d’instructions tant qu’une condition est remplie. Comparer les codes suivant:}
+\begin{cCode}
+int sortie=3;
+do{
+	sortie--;
+}while(sortie>0);
+\end{cCode}
+
+\begin{cCode}
+int sortie=3;
+while(sortie>0){
+	sortie--;
+}
+\end{cCode}
+\begin{cCode}
+for(i=3; i>0; i--){
+	printf("i vaut:%d",i);
+}
+\end{cCode}
+
+\TODO{Ecrire un programme qui réalise l'affichage suivant : }
+
+\begin{verbatim}
+         *
+        ***
+       *****
+      *******
+     *********
+    ***********
+   *************
+  ***************
+ ***************** 
+\end{verbatim}
+
+ \TODO{ Écrire un programme qui saisit des entiers positifs. Le programme s'arrête dès qu'un entier négatif est saisi. Il affiche alors le nombre d'entiers positifs qui ont été saisis.}
+ \TODO{Modifier le programme précédent pour qu'il s'arrête quand ce qui est saisi n'est pas un entier.}
+ \TODO{Modifier le programme précédent pour qu'il affiche le plus grand entier qui a été saisi et la somme des tous les entiers saisis.}
+ 
+\section{Types structurés} 
+ 
+\subsection{Tableau}
+Un tableau est un ensemble ordonné d'éléments de même nature; les éléments sont manipulés individuellement, et désignés par un entier dans $[0, N-1]$.
+\begin{center}
+\texttt{ <type> <nom> [<taille>];}
+\end{center}
+
+\TODO{Reprenez les instructions suivantes : :}
+\begin{cCode}
+//initialisation statique 
+int tab[10] = {2,18,3,4,61,19,8,2,77,2};
+int tab[] = {2,18,3,4,61,19,8,2,77,2};
+//initialisation dynamique 
+int tab[10];
+tab[0] = 2; toto[1] = 18; toto[2] = 3; ... tab[9] = 2;
+\end{cCode}
+
+\TODO{Écrire un programme qui initialise aléatoirement un tableau de réel \texttt{tab}, et de taille \texttt{n} donnée par l'utilisateur.}
+\TODO{Modifier le programme précédent pour qu'il affiche le plus grand entier dans \texttt{tab}.}
+\TODO{Modifier le programme précédent pour que le tableau final soit trié.}
+
+\subsection{Chaînes de caractères }
+ Les chaînes de caractères sont stockées dans un tableau de \texttt{char} dont la fin est marquée par un caractère nul, de valeur 0 (caractère \texttt{'\textbackslash O'}).
+ 
+ \TODO{Reprenez les instructions suivantes :}
+
+\begin{cCode}
+char s1[8] = "exemple";
+char s2[] = "exemple";
+char s[12] = "Hello\0World!";
+printf("%s\n", s); // ce qui suit le caractère '\0' sera ignoré
+\end{cCode}
+\begin{cCode}
+char *str = "hello"; // pointeur sur char
+for(i=0; i<5; i++){
+	printf("%c\n", *(str+i)); // pointer sur le ième caractère
+}
+\end{cCode}
+\begin{cCode}
+char chaine[4];
+scanf("%4s",chaine); //essayer : "anticonstitutionnellement" 
+printf("%s", chaine);
+scanf("%4s",chaine); //essayer : "anticonstitutionnellement" et "un exemple"
+printf("%s", chaine);
+fgets(chaine, 4, stdin); //essayer : "anticonstitutionnellement" et "un exemple"
+printf("%s", chaine);
+chaine[2]='\0';
+printf("%s", chaine);
+\end{cCode}
+
+\TODO{Écrire un programme qui inverse une chaîne de caractère donnée par l'utilisateur.}
+\TODO{Écrire un programme qui concatène deux chaînes de caractères données par l'utilisateur.}
+
+De nombreuses fonctions de manipulation de chaînes sont directement fournies. Ces fonctions se trouvent dans le fichier \texttt{<string.h>}.
+
+\section{Les pointeurs}
+
+La plupart des langages de programmation offrent la possibilité d'accéder aux données dans la mémoire de l'ordinateur à l'aide de pointeurs, et cela à l'aide de variables auxquelles on peut attribuer les adresses d'autres variables.
+
+%En C, les pointeurs jouent un rôle primordial dans la définition de fonctions: Comme le passage des paramètres en C se fait toujours par la valeur, les pointeurs sont le seul moyen de changer le contenu de variables déclarées dans d'autres fonctions. Ainsi le traitement de tableaux et de chaînes de caractères dans des fonctions serait impossible sans l'utilisation de pointeurs.
+
+Lors du travail avec des pointeurs, nous avons besoin
+\begin{itemize}
+\item opérateur 'adresse de': \&
+pour obtenir l'adresse d'une variable,
+\item opérateur 'contenu de': *
+pour accéder au contenu d'une adresse.
+\end{itemize}
+
+\subsubsection*{Exemple :} 
+
+\begin{cCode}
+int *P;
+int A = 30;
+int B = 40;
+P = &A;
+B = *P;
+*P = 0;
+printf("%d\n", A);
+printf("%d\n", B);
+printf("%d\n", *P);
+\end{cCode}
+
+\TODO{Reprenez les instructions suivantes :}
+
+\begin{cCode}
+int A = 1;
+      int B = 2;
+      int C = 3;
+      int *P1, *P2;
+\end{cCode}    
+
+\TODO{Afficher le résultat de chacune des instructions suivantes : } 
+
+\begin{cCode}
+P1 = &A;
+P2 = &C;
+*P1 = (*P2)++;
+P1 = P2;
+P2 = &B;
+*P1 -= *P2;
+++*P2;
+*P1 *= *P2;
+A = ++*P2**P1;
+P1 = &A;
+*P2 =*P1/=*P2;
+\end{cCode}
+\newpage
+\section*{A propos du TP}
+
+Les sources de ce TP sont sur le dépot :
+
+  \begin{center}\url{github.com/nkantour/tpC}\end{center}
+
+
+  
+\subsection*{Quelques références :}
+\begin{itemize}
+\item[•] Olivier Boebion, Introduction à la programmation C sous Unix, \url{http://www.obs-vlfr.fr/~boebion/Unix/UNIX9.pdf}. \\
+\item[•] Eric Berthomier \& Daniel Schang, Le C en 20 heures, \url{https://framabook.org/docs/c20h/C20H_integrale_creative-commons-by-sa.pdf.}\\
+
+\item[•]Faber Frédéric, \url{https://www.ltam.lu/cours-c/prg-c_c.htm}.
+\end{itemize}
+
+\end{document}
+\grid
