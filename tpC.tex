@@ -394,7 +394,6 @@ De nombreuses fonctions de manipulation de chaînes sont directement fournies. C
 
 La plupart des langages de programmation offrent la possibilité d'accéder aux données dans la mémoire de l'ordinateur à l'aide de pointeurs, et cela à l'aide de variables auxquelles on peut attribuer les adresses d'autres variables.
 
-%En C, les pointeurs jouent un rôle primordial dans la définition de fonctions: Comme le passage des paramètres en C se fait toujours par la valeur, les pointeurs sont le seul moyen de changer le contenu de variables déclarées dans d'autres fonctions. Ainsi le traitement de tableaux et de chaînes de caractères dans des fonctions serait impossible sans l'utilisation de pointeurs.
 
 Lors du travail avec des pointeurs, nous avons besoin
 \begin{itemize}
@@ -427,7 +426,7 @@ int A = 1;
       int *P1, *P2;
 \end{cCode}    
 
-\TODO{Afficher le résultat de chacune des instructions suivantes : } 
+\TODO{Affichez le résultat de chacune des instructions suivantes : } 
 
 \begin{cCode}
 P1 = &A;
@@ -442,7 +441,179 @@ A = ++*P2**P1;
 P1 = &A;
 *P2 =*P1/=*P2;
 \end{cCode}
-\newpage
+
+
+
+\section{Les fonctions}
+
+En C, le programme principal (\texttt{main()}) et les sous-programmes sont définis comme fonctions.
+\begin{verbatim}
+	<Type_résultat> <Nom_Fonction> (<Type_Par1> <Nom_Par1>, ... )
+	{
+   		<déclarations locales>
+   		<instructions>
+   		return <résultat>;
+	}
+\end{verbatim}
+Et la syntaxe d'appel d'une fonction est la suivante : \begin{verbatim} <Nom_Fonction> ( <Nom_Par1>, ... )
+\end{verbatim}
+
+\subsection*{Exemple}
+
+\begin{cCode}
+#include <math.h>
+double tan(double x)
+{
+ if (cos(x) != 0)
+     return sin(x)/cos(x);
+ else 
+     printf("Erreur !\n");
+}
+\end{cCode}
+\begin{cCode}
+printf("tangente de %f est %f \n", x, tan(x));
+double t = tan(x);
+printf("tangente de %f est %f \n", x, t);
+\end{cCode}
+
+\TODO{Écrire un programme principale qui teste la fonction \texttt{tan(x)}.}
+\TODO{Modifier la fonction \texttt{tan(x)} pour qu'elle renvoie aussi \texttt{cot(x) = 1/tan(x))}.}
+
+ Les paramètres d'une fonction sont à considérer comme des variables locales qui sont initialisées automatiquement par les valeurs indiquées lors d'un appel.
+
+A l'intérieur de la fonction, nous pouvons changer les valeurs des paramètres sans influencer les valeurs originales dans les fonctions appelantes. Ainsi, on dit que le passage des paramètres se fait  par la valeur.
+
+\TODO{Reprenez le code suivant.}
+\begin{cCode}
+void Permuter(int a, int b)
+{
+ int temp;
+ temp = a;
+ a = b;
+ a = temp;
+}
+\end{cCode}
+\TODO{Dans un programme principale tester les instructions suivantes :}
+
+\begin{cCode}
+int a = 10;
+int b = 20;
+permuter(a,b);
+printf("a = %d, b = %d  \n", a, b);
+\end{cCode}
+
+
+Pour changer la valeur d'une variable de la fonction appelante, nous allons procéder comme suit:
+
+- la fonction appelante doit fournir l'adresse de la variable et,
+
+- la fonction appelée doit déclarer le paramètre comme pointeur.
+
+On peut alors atteindre la variable à l'aide du pointeur.
+
+\TODO{Reprenez le code suivant.}
+\begin{cCode}
+void Permuter(int *a, int *b)
+{
+ int temp;
+ temp = *a;
+ *a = *b;
+ *a = temp;
+}
+\end{cCode}
+\TODO{Dans un programme principale tester les instructions suivantes :}
+
+\begin{cCode}
+int a = 10;
+int b = 20;
+permuter(&a,&b);
+printf("a = %d, b = %d  \n", a, b);
+\end{cCode}
+
+
+\TODO{Que fait la fonction \texttt{tChaine()}?}
+
+\begin{cCode}
+int tChaine(char *s)
+{
+ int n;
+ for (n=0; *s != '\0'; s++)
+         n++;
+ return n;
+}
+\end{cCode}
+
+\TODO{Dans un programme principale affichez le résultats des instructions suivantes :}
+
+\begin{cCode}
+char ch[] = "Bonjour !";
+char *p;
+p = ch;
+tChaine(ch)
+tChaine(p)
+tChaine(&ch[4])
+tChaine(p+2)
+tChaine(ch+2)
+\end{cCode}
+
+\section{Les fichiers séquentiels}
+Un fichier est un ensemble structuré de données stocké en général sur un support externe. Un fichier structuré contient une suite d'enregistrements homogènes, qui regroupent le plus souvent plusieurs composantes (champs).
+
+ 
+  \begin{cCode}
+#include <stdio.h>
+int main()
+{
+  FILE *fichier; /* pointeur sur FILE */
+  char nomFichier[30], text[30];
+  int  compt,nbEnreg;
+  printf("Entrez le nom du fichier à créer : ");
+  scanf("%s", nomFichier);
+  fichier = fopen(nomFichier, "w");  // w = write 
+  printf("Nombre d'enregistrements à créer : ");
+  scanf("%d", &nbEnreg);
+  compt = 0;
+  while (compt<nbEnreg)
+     { 
+      printf("Entrez un text : ");
+      scanf("%s", text);
+      fprintf(fichier, "%s\n", text);
+      compt++;
+     }
+  fclose(fichier);
+  return 0;
+} 
+\end{cCode}
+
+
+Dans des fichiers séquentiels, les enregistrements sont mémorisés consécutivement dans l'ordre de leur entrée et peuvent seulement être lus dans cet ordre. Si on a besoin d'un enregistrement précis dans un fichier séquentiel, il faut lire tous les enregistrements qui le précèdent, en commençant par le premier. 
+
+ \begin{cCode}
+#include <stdio.h>
+int main()
+{
+  FILE *fichier; 
+  char nomFichier[30], text[30];
+  int  compt,nbEnreg;
+  fichier = fopen(nomFichier, "r");  // r = read 
+  compt = 0;
+  while (!feof(fichier))
+     {
+      fscanf(fichier, "%s\n", text);
+      printf("enregistrement %d text : %s\n",compt ,text);
+      compt++;
+     }
+  fclose(fichier);
+  return 0;
+} 
+\end{cCode}
+
+\TODO{Reprendre les deux codes précédents.}
+
+
+\TODO{L'instruction \texttt{fichier = fopen(nomFichier, "a")} permet d'ouvrir un fichier en mode 'a', écriture en fin de fichier. Modifiez le code précédent pour qu'il ajoute un nombre donné de ligne à la fin d'un fichier existant. }
+
+
 \section*{A propos du TP}
 
 Les sources de ce TP sont sur le dépot :
