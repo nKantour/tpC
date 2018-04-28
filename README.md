@@ -1,2 +1,2 @@
-## TP N°7 : (In progress)
+## TP N°7 :
 C language basics.
